@@ -1,0 +1,1 @@
+clang -fobjc-arc -framework Foundation main.m -o prog1
