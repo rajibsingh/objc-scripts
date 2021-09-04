@@ -13,8 +13,9 @@
 @end
 
 int main() {
-    /* my first program in Objective-C */
     SampleClass *sampleClass = [[SampleClass alloc]init];
     [sampleClass sampleMethod];
+    NSString *resDir = [[NSBundle mainBundle] resourcePath];
+    printf("%s", resDir);
     return 0;
 }
