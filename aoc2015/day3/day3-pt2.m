@@ -4,6 +4,7 @@
     NSUInteger x;
     NSUInteger y;
 }
+
 @property(nonatomic, readwrite) NSUInteger x;
 @property(nonatomic, readwrite) NSUInteger y;
 @end
@@ -49,6 +50,8 @@
 }
 @property(nonatomic, readwrite) NSUInteger x;
 @property(nonatomic, readwrite) NSUInteger y;
+-(void) move:(unichar) command;
+-(GridAddress*) getLocation;
 @end
 
 @implementation Santa 
@@ -58,6 +61,29 @@
     x = 0.0;
     y = 0.0;
     return self;
+}
+
+-(void) move:(unichar)command {
+    switch(command) {
+        case '^':
+            self.y += 1;
+            break;
+        case 'v':
+            self.y -= 1;
+            break;
+        case '<':
+            self.x -= 1;
+            break;
+        case '>':
+            self.x += 1;
+            break;
+    }
+}
+-(GridAddress*) getLocation {
+    GridAddress *address = [[GridAddress alloc] init];
+    address.x = self.x;
+    address.y = self.y;
+    return address;
 }
 @end
 
@@ -69,29 +95,16 @@ int main() {
     NSMutableSet<GridAddress *> *addresses = [NSMutableSet setWithCapacity:10];
     Santa *santa = [[Santa alloc] init];
     Santa *roboSanta = [[Santa alloc] init];
-
-    int x = 0;
-    int y = 0;
+    Santa *currSanta;
     for (NSInteger i = 0; i < fileContent.length ; i++) {
-        unichar idx = [fileContent characterAtIndex:i];
-        // NSLog(@"%c",idx);
-        switch(idx){
-            case '^':
-                y += 1;
-                break;
-            case 'v':
-                y -= 1;
-                break;
-            case '<':
-                x -= 1;
-                break;
-            case '>':
-                x += 1;
-                break;
-        }
-        GridAddress *address = [[GridAddress alloc] init];
-        address.x = x;
-        address.y = y;
+        if (i % 2 == 0)
+            currSanta = santa;
+        else
+            currSanta = roboSanta;
+            
+        unichar direction = [fileContent characterAtIndex:i];
+        [currSanta move: direction];
+        GridAddress *address = [currSanta getLocation];
         [addresses addObject:address];
      }
     printf("number of addresses: %lu", [addresses count]);
