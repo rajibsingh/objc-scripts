@@ -1,84 +1,30 @@
 #import <Foundation/Foundation.h>
+#import <CommonCrypto/CommonDigest.h>
 
-@interface GridAddress:NSObject {
-    NSUInteger x;
-    NSUInteger y;
-}
-
-@property(nonatomic, readwrite) NSUInteger x;
-@property(nonatomic, readwrite) NSUInteger y;
+@interface NSString (MD5)
+- (NSString *)MD5String;
 @end
 
-@implementation GridAddress
-
-@synthesize x, y;
-
--(id)init {
-    self = [super init];
-    x = 0.0;
-    y = 0.0;
-    return self;
-}
-
--(BOOL)isEqual:(id)other {
-    if (other == self)
-        return YES;
-    else if (!other || ![other isKindOfClass:[self class]]) {
-        return NO;
-    }
-    if ([other isKindOfClass:[self class]]) {
-        GridAddress * otherGA = (GridAddress *)other;
-        if (self.x == otherGA.x && self.y == otherGA.y) {
-            return YES;
-        }
-        else 
-            return NO;
-    }
-    return NO;
-}
-
-- (NSUInteger)hash {
-    NSUInteger prime = 31;
-    NSUInteger result = 1;
-    result = prime * result + self.x;
-    result = prime * result + self.y;
-    // NSLog(@"hash: %lu", result);
-    return result;
+@implementation NSString (MD5)
+- (NSString *)MD5String {
+    const char *cStr = [self UTF8String];
+    unsigned char result[CC_MD5_DIGEST_LENGTH];
+    CC_MD5( cStr, (CC_LONG)strlen(cStr), result );
+    return [NSString stringWithFormat:
+        @"%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X",
+        result[0], result[1], result[2], result[3], 
+        result[4], result[5], result[6], result[7],
+        result[8], result[9], result[10], result[11],
+        result[12], result[13], result[14], result[15]
+    ];  
 }
 
 @end
-
-int main() {
+int main(int argc, char *argv[]) {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
-    NSString* fileContent = [NSString stringWithContentsOfFile:@"input.txt"
-                            encoding:NSUTF8StringEncoding error:nil];
-    NSMutableSet<GridAddress*> *addresses = [NSMutableSet setWithCapacity:10];
-    int x = 0;
-    int y = 0;
-    for (NSInteger i = 0; i < fileContent.length ; i++) {
-        unichar idx = [fileContent characterAtIndex:i];
-        // NSLog(@"%c",idx);
-        switch(idx){
-            case '^':
-                y += 1;
-                break;
-            case 'v':
-                y -= 1;
-                break;
-            case '<':
-                x -= 1;
-                break;
-            case '>':
-                x += 1;
-                break;
-        }
-        // NSLog(@"%d, %d", x, y);
-        GridAddress *address = [[GridAddress alloc] init];
-        address.x = x;
-        address.y = y;
-        [addresses addObject:address];
-     }
-    printf("number of addresses: %lu", [addresses count]);
+    NSString *key = @"yzbqklnj";
+    NSString *hash = [key MD5String];
+    NSLog(@"%@", hash);
     [pool drain];
     return 0;
 }
