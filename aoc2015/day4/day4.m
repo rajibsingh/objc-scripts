@@ -1,6 +1,7 @@
 #import <Foundation/Foundation.h>
 #import <CommonCrypto/CommonDigest.h>
 
+//blindly cut and pasted the MD5 hasher from https://stackoverflow.com/a/2018626/1922101
 @interface NSString (MD5)
 - (NSString *)MD5String;
 @end
@@ -23,8 +24,15 @@
 int main(int argc, char *argv[]) {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     NSString *key = @"yzbqklnj";
-    NSString *hash = [key MD5String];
-    NSLog(@"%@", hash);
+    for(unsigned long int counter = 0; counter < 1000000; counter++) {
+        NSString *counterString = [NSString stringWithFormat:@"%d",counter];
+        NSString *hashinput = [key stringByAppendingString:counterString]; 
+        NSString *hash = [hashinput MD5String];
+        NSString *firstFive = [hash substringToIndex:5];
+        NSLog(@"%@ %@ %@", hashinput, hash, firstFive);
+        if ([firstFive isEqualToString: @"00000"])
+            break;
+    }
     [pool drain];
     return 0;
 }
