@@ -1,6 +1,6 @@
 #import <Foundation/Foundation.h>
 
-int main(int argc, char *argv[] ) {
+int main() {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     NSLog(@"argc: %d", argc);
     for (int i = 0; i < argc; i++) {
