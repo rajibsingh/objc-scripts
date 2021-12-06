@@ -17,7 +17,7 @@ bool hasQualifyingBigram(NSString* input) {
     for (int i = 0; i < input.length -1; i++) {
         NSRange bigramRange = NSMakeRange(i, 2);
         NSString* bigram = [input substringWithRange:bigramRange];
-        NSLog(@"bigram: %@", bigram);
+        // NSLog(@"bigram: %@", bigram);
         unichar char1 = [bigram characterAtIndex:0];
         unichar char2 = [bigram characterAtIndex:1];
         if (char1 == char2) {

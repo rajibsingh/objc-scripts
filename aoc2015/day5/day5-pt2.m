@@ -1,41 +1,39 @@
 #import <Foundation/Foundation.h>
 
-bool hasMatchingBigram(NSString* input){
-    for (int i = 0; i < lineStr.lenth -1; i++) {
+
+bool hasQualifyingBigram(NSString* input) {
+    bool retVal = NO;
+    NSMutableArray *bigrams = [[NSMutableArray alloc] init];
+    for (int i = 0; i < input.length - 2; i++) {
         NSRange bigramRange = NSMakeRange(i, 2);
         NSString* bigram = [input substringWithRange:bigramRange];
-        if ([bigram characterAtIndex:0] == [bigram characterAtIndex:1]
-                && [bigram characterAtIndex:0] != [bigram characterAtIndex:1] ) {
-            NSLog(@"%@ is a matching bigram", bigram);
-            return YES;
+        NSLog(@"bigram: %@", bigram);
+        [bigrams addObject:bigram]; 
+        unichar char1 = [bigram characterAtIndex:0];
+        unichar char2 = [bigram characterAtIndex:1];
+        unichar char3 = [bigram characterAtIndex:1];
+        if (char1 == char3 && char1 != char2) {
+            retVal = YES;
+                NSLog(@"%@ is a matching bigram", bigram);
         }
     }
-    return NO;
+    return retVal;
 }
-bool hasMatchingTrigram(NSString* trigram) {
-    if ([trigram characterAtIndex:0] == [trigram characterAtIndex:1]
-            && [trigram characterAtIndex:0] != [trigram characterAtIndex:1] ) {
-        NSLog(@"%@ is a matching trigram", trigram);
-        return YES;
-    }
-    return NO;
-}
+
 int main() {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     NSString* filePath = @"input.txt";
     NSString* fileContent = [NSString stringWithContentsOfFile:@"input.txt"
                             encoding:NSUTF8StringEncoding error:nil];
     NSArray* lines = [fileContent componentsSeparatedByString:(NSString *)@"\n"];
-    int totalNice = 0;
-    for (id line in lines) {
-        NSString* lineStr = (NSString *)line;
-        NSLog(@"lineStr: %@", lineStr);
-        if (hasMatchingBigram(lineStr) && hasMatchingTrigram(lineStr)) {
-            totalNice += 1;
-        }
+    int count = 0;
+    for (NSString* line in lines) {
+        NSLog(@"line: %@", line);
+        if (hasQualifyingBigram(line)) {
+            count += 1;
+        } 
     }
-    NSLog(@"total nice: %d", totalNice);
-
+    NSLog(@"count: %d", count);
     [pool drain];
     return 0;
 }
