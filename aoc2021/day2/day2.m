@@ -1,38 +1,36 @@
 #import <Foundation/Foundation.h>
 
-@interface Window:NSObject {
+@interface Sub:NSObject {
+    NSInteger x;
+    NSInteger y;
     NSMutableArray *valArray;
 }
--(int)sum;
--(void)add:(NSNumber*) intVal;
+-(int)calc;
+-(void)move:(NSString*) direction :(NSInteger) distance;
+@property(nonatomic, readwrite) NSInteger x;
+@property(nonatomic, readwrite) NSInteger y;
 @end
 
-@implementation Window
-
+@implementation Sub 
+@synthesize x, y;
 -(id)init {
     self = [super init];
     valArray = [[NSMutableArray alloc] init];
     return self;
 }
 
--(int)sum {
-    int sum = 0;
-    if ([valArray count] < 3) {
-        return 0;
-    }
-    for (int i = 0; i < [valArray count]; i++) {
-        NSNumber* number = [valArray objectAtIndex:i];
-        sum = sum + [number intValue];
-    }
-    return sum;
+-(int)calc {
+    return x * y;
 }
--(void)add:(NSNumber*)intVal {
-    // NSLog(@"*** %@", intVal);
-    [valArray addObject:intVal];
-    if ([valArray count] > 3) {
-        [valArray removeObjectAtIndex:0];
+-(void)move:(NSString*) direction :(NSInteger) distance {
+    if ([direction isEqualToString:@"forward"]) {
+        x = x + distance;
+    } else if ([direction isEqualToString:@"up"]) {
+        y = y - distance;
+    } else if ([direction isEqualToString:@"down"]) {
+        y = y + distance;
     }
-    // NSLog(@"(%@) %d", [valArray componentsJoinedByString:@","], [self sum]); 
+    return;
 }
 @end
 
@@ -42,23 +40,17 @@ int main() {
     NSString* fileContent = [NSString stringWithContentsOfFile:filePath
                             encoding:NSUTF8StringEncoding error:nil];
     NSArray* lines = [fileContent componentsSeparatedByString:(NSString *)@"\n"];
-    int counter = 0;
-    int prevSum = 0;
-    Window *window = [[Window alloc] init];
+    Sub *sub= [[Sub alloc] init];
     for (NSString* line in lines) {
-        NSNumber* intVal = [NSNumber numberWithInt:[line intValue]];
-        [window add:intVal];
-        int sum = [window sum];
-        NSLog(@"sum:%d, prevSum:%d", sum, prevSum);
-        if (prevSum != 0 && sum > prevSum) {
-            counter++;
-            NSLog(@"increased! counter: %d", counter);
-        } else {
-            NSLog(@"%d", counter);
-        }
-        prevSum = sum;
+        // NSLog(@"%@", line);
+        NSArray* commandComponents = [line componentsSeparatedByString:@" "];
+        NSString* direction = commandComponents[0];
+        NSInteger distance = [commandComponents[1] integerValue];
+        [sub move:direction:distance];
+        // NSNumber* intVal = [NSNumber numberWithInt:[line intValue]];
+        // NSLog(@"sum:%d, prevSum:%d", sum, prevSum);
     }
-    NSLog(@"counter: %d", counter);
+    NSLog(@"calc: %d", [sub calc]);
     [pool drain];
     return 0;
 }
