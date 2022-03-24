@@ -24,7 +24,6 @@ int main() {
     }
     NSLog(@"totalSqFt: %d", totalSqFt);
 
-
     [pool drain];
     return 0;
 }
