@@ -1,5 +1,7 @@
 #import <Foundation/Foundation.h>
 
+// bogus message
+
 int main() {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     NSString* filePath = @"input.txt";
