@@ -1,6 +1,5 @@
 #import <Foundation/Foundation.h>
 
-
 bool hasQualifyingBigram(NSString* input) {
     bool retVal = NO;
     NSMutableArray *bigrams = [[NSMutableArray alloc] init];
@@ -20,6 +19,23 @@ bool hasQualifyingBigram(NSString* input) {
     return retVal;
 }
 
+bool hasQualifyingTrigram(NSString* input) {
+    bool retVal = NO;
+    for (int i = 0; i < input.length - 3; i++) {
+        NSRange trigramRange = NSMakeRange(i, 3);
+        NSString* trigram = [input substringWithRange:trigramRange];
+        NSLog(@"trigram: %@", trigram);
+        unichar char1 = [trigram characterAtIndex:0];
+        unichar char2 = [trigram characterAtIndex:1];
+        unichar char3 = [trigram characterAtIndex:2];
+        if (char1 == char3 && char2 != char1) {
+            NSLog(@"True");
+            return YES;
+        }
+    }
+    return NO;
+}
+
 int main() {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     NSString* filePath = @"input.txt";
@@ -29,9 +45,7 @@ int main() {
     int count = 0;
     for (NSString* line in lines) {
         NSLog(@"line: %@", line);
-        if (hasQualifyingBigram(line)) {
-            count += 1;
-        } 
+        hasQualifyingTrigram(line);
     }
     NSLog(@"count: %d", count);
     [pool drain];

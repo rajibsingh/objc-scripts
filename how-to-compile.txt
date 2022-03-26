@@ -1,1 +1,3 @@
 clang -fobjc-arc -framework Foundation main.m -o prog1
+
+gcc -framework Cocoa helloworld.m -o helloworld
