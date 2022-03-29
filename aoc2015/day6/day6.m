@@ -2,7 +2,7 @@
 /*********************************/
 @interface Memory:NSObject 
 
-    -(void)turnOn;
+-(void)turnOn:(NSString*) startCoord endCoord:(NSString*)endCoord;
 
 @end
 /*********************************/
@@ -10,8 +10,13 @@
 
 bool matrix[1000*1000];
 
--(void)turnOn {
-    NSLog(@"hhh");
+-(void)turnOn:(NSString*) startCoord endCoord:(NSString*)endCoord {
+    NSLog(@"\tstartCoord: %@\n", startCoord);
+    NSLog(@"\tendCoord: %@\n", endCoord);
+}
+
+-(void)convertCoords:(NSString*) coord {
+    NSLog(@"\tconvert coord: %@\n", coord);
 }
 
 @end
@@ -23,22 +28,24 @@ int main() {
     NSString* fileContent = [NSString stringWithContentsOfFile:@"input.txt"
                             encoding:NSUTF8StringEncoding error:nil];
     NSArray* lines = [fileContent componentsSeparatedByString:(NSString *)@"\n"];
+    Memory *mem = [[Memory alloc] init];
     for (NSString* line in lines) {
         NSLog(@"*** line: %@", line);
         NSArray* words = [line componentsSeparatedByString:(NSString *)@" "];
         if ([words[0] isEqualTo:@"turn"]) {
+            NSString* startCoords = words[2];
+            NSString* endCoords = words[4];
             if([words[1] isEqualTo:@"on"]) {
-                NSLog(@"received turnOn command");
+                NSLog(@"turnOn %@ %@", startCoords, endCoords);
             }
-            if([words[1] isEqualTo:@"off"]) {
-                NSLog(@"received turnOff command");
+            else if([words[1] isEqualTo:@"off"]) {
+                NSLog(@"turnOn %@ %@", startCoords, endCoords);
             }
         }
         else if ([words[0] isEqualTo:@"toggle"]) {
             NSLog(@"received toggle command");
         }
     }
-    Memory *mem = [[Memory alloc] init];
 
     [pool drain];
     return 0;
