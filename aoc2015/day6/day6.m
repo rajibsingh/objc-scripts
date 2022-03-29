@@ -1,4 +1,5 @@
 #import <Foundation/Foundation.h>
+/** refer to https://www.tutorialspoint.com/objective_c/objective_c_classes_objects.htm **/
 /*********************************/
 @interface Memory:NSObject 
 
