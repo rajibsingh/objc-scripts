@@ -4,6 +4,7 @@
 @interface Memory:NSObject 
 
 -(void)turnOn:(NSString*) startCoord endCoord:(NSString*)endCoord;
+-(int)convert:(NSString*) coord;
 
 @end
 /*********************************/
@@ -16,8 +17,13 @@ bool matrix[1000*1000];
     NSLog(@"\tendCoord: %@\n", endCoord);
 }
 
--(void)convertCoords:(NSString*) coord {
-    NSLog(@"\tconvert coord: %@\n", coord);
+-(int)convert:(NSString*) inputString {
+    NSLog(@"\tinputString: %@\n", inputString);
+    NSArray* coords = [inputString componentsSeparatedByString:(NSString*)@","];
+    NSInteger x = [coords[0] integerValue];
+    NSInteger y = [coords[1] integerValue];
+    int retval = [coords[0] integerValue] * 1000 + [coords[1] integerValue];
+    return retval;
 }
 
 @end
