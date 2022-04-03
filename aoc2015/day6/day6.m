@@ -22,7 +22,7 @@ typedef struct {
 bool matrix[1000][1000];
 
 -(MemPoint)convert:(NSString*) inputString {
-    NSLog(@"\tinputString: %@\n", inputString);
+    // NSLog(@"\tinputString: %@\n", inputString);
     NSArray* coords = [inputString componentsSeparatedByString:(NSString*)@","];
     NSUInteger x = [coords[0] integerValue];
     NSUInteger y = [coords[1] integerValue];
@@ -33,10 +33,10 @@ bool matrix[1000][1000];
 -(void)setBlock:(NSString*) startCoord endCoord:(NSString*)endCoord state:(BOOL)state {
     MemPoint start = [self convert:startCoord];
     MemPoint end = [self convert:endCoord];
-    // NSLog(@"\tstart.x: %lu start.y %lu \tend.x: %lu end.y: %lu\n", 
-        // start.x, start.y, end.x, end.y);
-    for (int i = start.y; i <= end.y; i++) {
-        for (int j = start.x; j <= end.y; j++) {
+    NSLog(@"\tstart.x: %lu start.y %lu \tend.x: %lu end.y: %lu\n", 
+        start.x, start.y, end.x, end.y);
+    for (int i = start.x; i <= end.x; i++) {
+        for (int j = start.y; j <= end.y; j++) {
             matrix[i][j] = state; 
         }
     }
@@ -47,8 +47,8 @@ bool matrix[1000][1000];
     MemPoint end = [self convert:endCoord];
     // NSLog(@"\tstart.x: %lu start.y %lu \tend.x: %lu end.y: %lu\n", 
         // start.x, start.y, end.x, end.y);
-    for (int i = start.y; i <= end.y; i++) {
-        for (int j = start.x; j <= end.y; j++) {
+    for (int i = start.x; i <= end.x; i++) {
+        for (int j = start.y; j <= end.y; j++) {
             matrix[i][j] = !matrix[i][j]; 
         }
     }
@@ -75,6 +75,7 @@ int main() {
                             encoding:NSUTF8StringEncoding error:nil];
     NSArray* lines = [fileContent componentsSeparatedByString:(NSString *)@"\n"];
     Memory *mem = [[Memory alloc] init];
+    NSLog(@"count before: %d", [mem count]);
     for (NSString* line in lines) {
         NSLog(@"*** line: %@", line);
         NSArray* words = [line componentsSeparatedByString:(NSString *)@" "];
@@ -82,16 +83,16 @@ int main() {
             NSString* startCoords = words[2];
             NSString* endCoords = words[4];
             if([words[1] isEqualTo:@"on"]) {
-                NSLog(@"turnOn %@ %@", startCoords, endCoords);
+                // NSLog(@"turnOn %@ %@", startCoords, endCoords);
                 [mem setBlock:startCoords endCoord:endCoords state:YES];
             }
             else if([words[1] isEqualTo:@"off"]) {
-                NSLog(@"turnOff %@ %@", startCoords, endCoords);
+                // NSLog(@"turnOff %@ %@", startCoords, endCoords);
                 [mem setBlock:startCoords endCoord:endCoords state:NO];
             }
         }
         else if ([words[0] isEqualTo:@"toggle"]) {
-            NSLog(@"received toggle command");
+            // NSLog(@"received toggle command");
             NSString* startCoords = words[1];
             NSString* endCoords = words[3];
             [mem flip:startCoords endCoord:endCoords];
