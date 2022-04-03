@@ -3,8 +3,9 @@
 /*********************************/
 @interface Memory:NSObject 
 
--(void)turnOn:(NSString*) startCoord endCoord:(NSString*)endCoord;
--(int)convert:(NSString*) coord;
+-(int)convert:(NSString*) inputString;
+-(void)setBlock:(NSString*)startCoord endCoord:(NSString*)endCoord state:(BOOL)state;
+-(void)flip:(NSString*)startCoord endCoord:(NSString*)endCoord;
 
 @end
 /*********************************/
@@ -12,18 +13,32 @@
 
 bool matrix[1000*1000];
 
--(void)turnOn:(NSString*) startCoord endCoord:(NSString*)endCoord {
-    NSLog(@"\tstartCoord: %@\n", startCoord);
-    NSLog(@"\tendCoord: %@\n", endCoord);
-}
-
 -(int)convert:(NSString*) inputString {
     NSLog(@"\tinputString: %@\n", inputString);
     NSArray* coords = [inputString componentsSeparatedByString:(NSString*)@","];
     NSInteger x = [coords[0] integerValue];
     NSInteger y = [coords[1] integerValue];
     int retval = [coords[0] integerValue] * 1000 + [coords[1] integerValue];
+    NSLog(@"converted to one dimensional: %d", retval);
     return retval;
+}
+
+-(void)setBlock:(NSString*) startCoord endCoord:(NSString*)endCoord state:(BOOL)state {
+    int start = [self convert:startCoord];
+    int end = [self convert:endCoord];
+    NSLog(@"\tstart: %d end: %d\n", start, end);
+    for (int i = start; i <= end; i++) {
+        matrix[i] = state; 
+    }
+}
+
+-(void)flip:(NSString*) startCoord endCoord:(NSString*)endCoord {
+    int start = [self convert:startCoord];
+    int end = [self convert:endCoord];
+    NSLog(@"\tstart: %d end: %d\n", start, end);
+    for (int i = start; i <= end; i++) {
+        matrix[i] = !matrix[i];
+    }
 }
 
 @end
@@ -44,14 +59,20 @@ int main() {
             NSString* endCoords = words[4];
             if([words[1] isEqualTo:@"on"]) {
                 NSLog(@"turnOn %@ %@", startCoords, endCoords);
+                [mem setBlock:startCoords endCoord:endCoords state:YES];
             }
             else if([words[1] isEqualTo:@"off"]) {
-                NSLog(@"turnOn %@ %@", startCoords, endCoords);
+                NSLog(@"turnOff %@ %@", startCoords, endCoords);
+                [mem setBlock:startCoords endCoord:endCoords state:NO];
             }
         }
         else if ([words[0] isEqualTo:@"toggle"]) {
             NSLog(@"received toggle command");
+            NSString* startCoords = words[1];
+            NSString* endCoords = words[2];
+            [mem flip:startCoords endCoord:endCoords];
         }
+
     }
 
     [pool drain];
