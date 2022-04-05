@@ -7,6 +7,7 @@
 -(Circuitboard*)init;
 -(void)addToDict:(NSString*)key value:(NSString*)value;
 -(void)print;
+-(BOOL)isNumeric:(NSString*)key;
 
 @end
 /*********************************/
@@ -29,6 +30,39 @@ NSMutableDictionary *board;
     NSLog(@"board: %@", board);
 }
 
+-(BOOL)isNumeric:(NSString*)str {
+    NSLog(@"testing: %@", str);
+    NSUInteger len = [str length];
+    for (int i = 0; i < len; i++) {
+        unichar ch = [str characterAtIndex:i];
+        NSLog(@"testing %C", ch);
+        switch(ch) {
+            case '0':
+                break;
+            case '1':
+                break;
+            case '2':
+                break;
+            case '3':
+                break;
+            case '4':
+                break;
+            case '5':
+                break;
+            case '6':
+                break;
+            case '7':
+                break;
+            case '8':
+                break;
+            case '9':
+                break;
+            default:
+                return NO;
+        }
+    }
+    return YES;
+}
 @end
 /*********************************/
 
@@ -42,7 +76,13 @@ int main() {
     for (NSString* line in lines) {
         NSLog(@"*** line: %@", line);
         NSArray* words = [line componentsSeparatedByString:(NSString *)@" "];
-        [circuitboard addToDict:words[0] value:words[1]];
+        if ([words[0] isEqualTo:@"NOT"]) {
+            NSLog(@"running NOT case");
+        } else if ([circuitboard isNumeric:words[0]]) {
+            NSLog(@"running numeric case");
+        } else {
+            NSLog(@"running the default case");
+        }
         
         // if ([words[0] isEqualTo:@"turn"]) {
             // NSString* startCoords = words[2];
