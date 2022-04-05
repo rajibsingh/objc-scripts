@@ -1,68 +1,32 @@
 #import <Foundation/Foundation.h>
-/** refer to https://www.tutorialspoint.com/objective_c/objective_c_classes_objects.htm **/
-
-typedef struct {
-    NSUInteger x;
-    NSUInteger y;
-} MemPoint;
 
 
 /*********************************/
-@interface Memory:NSObject 
+@interface Circuitboard:NSObject 
 
--(MemPoint)convert:(NSString*) inputString;
--(void)setBlock:(NSString*)startCoord endCoord:(NSString*)endCoord state:(BOOL)state;
--(void)flip:(NSString*)startCoord endCoord:(NSString*)endCoord;
--(int)count;
+-(Circuitboard*)init;
+-(void)addToDict:(NSString*)key value:(NSString*)value;
+-(void)print;
 
 @end
 /*********************************/
-@implementation Memory
+@implementation Circuitboard 
 
-bool matrix[1000][1000];
+NSMutableDictionary *board;
 
--(MemPoint)convert:(NSString*) inputString {
-    // NSLog(@"\tinputString: %@\n", inputString);
-    NSArray* coords = [inputString componentsSeparatedByString:(NSString*)@","];
-    NSUInteger x = [coords[0] integerValue];
-    NSUInteger y = [coords[1] integerValue];
-    MemPoint retVal = { x, y };
-    return retVal;
+-(Circuitboard*)init {
+    if (self = [super init]) {
+        board =  [[NSMutableDictionary alloc] initWithCapacity:1];
+    }
+    return self;
 }
 
--(void)setBlock:(NSString*) startCoord endCoord:(NSString*)endCoord state:(BOOL)state {
-    MemPoint start = [self convert:startCoord];
-    MemPoint end = [self convert:endCoord];
-    NSLog(@"\tstart.x: %lu start.y %lu \tend.x: %lu end.y: %lu\n", 
-        start.x, start.y, end.x, end.y);
-    for (int i = start.x; i <= end.x; i++) {
-        for (int j = start.y; j <= end.y; j++) {
-            matrix[i][j] = state; 
-        }
-    }
+-(void)addToDict:(NSString*)key value:(NSString*)value {
+    [board setObject:value forKey:key];
 }
 
--(void)flip:(NSString*) startCoord endCoord:(NSString*)endCoord {
-    MemPoint start = [self convert:startCoord];
-    MemPoint end = [self convert:endCoord];
-    // NSLog(@"\tstart.x: %lu start.y %lu \tend.x: %lu end.y: %lu\n", 
-        // start.x, start.y, end.x, end.y);
-    for (int i = start.x; i <= end.x; i++) {
-        for (int j = start.y; j <= end.y; j++) {
-            matrix[i][j] = !matrix[i][j]; 
-        }
-    }
-}
-
--(int)count {
-    int count = 0;
-    for (int i=0; i < 1000; i++) {
-        for (int j=0; j<1000; j++) {
-            if (matrix[i][j] == YES) 
-                count++;
-        }
-    }
-    return count;
+-(void)print {
+    NSLog(@"board: %@", board);
 }
 
 @end
@@ -74,11 +38,12 @@ int main() {
     NSString* fileContent = [NSString stringWithContentsOfFile:@"input.txt"
                             encoding:NSUTF8StringEncoding error:nil];
     NSArray* lines = [fileContent componentsSeparatedByString:(NSString *)@"\n"];
-    // Memory *mem = [[Memory alloc] init];
-    // NSLog(@"count before: %d", [mem count]);
+    Circuitboard *circuitboard = [[Circuitboard alloc] init];
     for (NSString* line in lines) {
         NSLog(@"*** line: %@", line);
-        // NSArray* words = [line componentsSeparatedByString:(NSString *)@" "];
+        NSArray* words = [line componentsSeparatedByString:(NSString *)@" "];
+        [circuitboard addToDict:words[0] value:words[1]];
+        
         // if ([words[0] isEqualTo:@"turn"]) {
             // NSString* startCoords = words[2];
             // NSString* endCoords = words[4];
@@ -99,6 +64,7 @@ int main() {
         // }
 
     }
+    [circuitboard print];
 
     [pool drain];
     return 0;
