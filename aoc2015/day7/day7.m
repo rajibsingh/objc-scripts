@@ -1,13 +1,14 @@
 #import <Foundation/Foundation.h>
 
-
 /*********************************/
 @interface Circuitboard:NSObject 
 
 -(Circuitboard*)init;
--(void)addToDict:(NSString*)key value:(NSString*)value;
--(void)print;
+-(void)addToDict:(NSString*)key value:(NSInteger)value;
+-(NSInteger)getRegister:(NSString*)name;
 -(BOOL)isNumeric:(NSString*)key;
+-(void)rshift:(NSString*)src shifts:(NSInteger)shifts;
+-(void)print;
 
 @end
 /*********************************/
@@ -22,8 +23,18 @@ NSMutableDictionary *board;
     return self;
 }
 
--(void)addToDict:(NSString*)key value:(NSString*)value {
-    [board setObject:value forKey:key];
+-(void)addToDict:(NSString*)key value:(NSInteger)value {
+    NSNumber* valObj= [NSNumber numberWithInt:value];
+    [board setObject:valObj forKey:key];
+}
+
+-(NSInteger)getRegister:(NSString*)name {
+    NSNumber* retVal = board[name];
+    return [retVal integerValue];
+}
+
+-(void)rshift:(NSString*)src shifts:(NSInteger)shifts {
+
 }
 
 -(void)print {
