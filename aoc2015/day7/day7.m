@@ -10,6 +10,9 @@
 -(void)rshift:(NSString*)src shifts:(NSInteger)shifts dest:(NSString*)dest;
 -(void)lshift:(NSString*)src shifts:(NSInteger)shifts dest:(NSString*)dest;
 -(void)band:(NSString*)src1 src2:(NSString*)src2 dest:(NSString*)dest;
+-(void)sendSignal:(NSInteger)sigVal dest:(NSString*)dest;
+-(void)bor:(NSString*)src1 src2:(NSString*)src2 dest:(NSString*)dest;
+-(void)bnot:(NSString*)src1 dest:(NSString*)dest;
 -(void)print;
 
 @end
@@ -66,10 +69,33 @@ NSMutableDictionary *board;
 -(void)band:(NSString*)src1 src2:(NSString*)src2 dest:(NSString*)dest {
     NSLog(@"running bAnd case: src1: %@ src2: %@ dest: %@", src1, src2, dest);
     NSNumber* src1val = [board objectForKey:src1];
-    NSNumber* src2val = [board objectForKey:src1];
+    NSNumber* src2val = [board objectForKey:src2];
     NSInteger retVal = [src1val integerValue] & [src2val integerValue];
     NSLog(@"retVal: %ld", retVal);
     [self addToDict:dest value:retVal];
+}
+
+-(void)bor:(NSString*)src1 src2:(NSString*)src2 dest:(NSString*)dest {
+    NSLog(@"running bOr case: src1: %@ src2: %@ dest: %@", src1, src2, dest);
+    NSNumber* src1val = [board objectForKey:src1];
+    NSNumber* src2val = [board objectForKey:src2];
+    NSInteger retVal = [src1val integerValue] | [src2val integerValue];
+    NSLog(@"retVal: %ld", retVal);
+    [self addToDict:dest value:retVal];
+}
+
+
+-(void)bnot:(NSString*)src dest:(NSString*)dest {
+    NSLog(@"running bNot case: src: %@ dest: %@", src, dest);
+    NSNumber* srcVal = [board objectForKey:src];
+    NSUInteger retVal = ~[srcVal uint32Value];
+    NSLog(@"retVal: %ld", retVal);
+    [self addToDict:dest value:retVal];
+}
+
+-(void)sendSignal:(NSInteger)sigVal dest:(NSString*)dest {
+    NSLog(@"running the sendSignal case: dest: %@ sigVal:%ld", dest, sigVal);
+    [self addToDict:dest value:sigVal];
 }
 
 
@@ -139,15 +165,22 @@ int main() {
             NSString* src2 = words[2];
             NSString* dest = words[4];
             [circuitboard band:src1 src2:src2 dest:dest];
-        }
- 
-
-        else if ([circuitboard isNumeric:words[0]]) {
-            // NSLog(@"running numeric case");
+        } else if ([words[1] isEqualTo:@"OR"]) {
+            NSString* src1 = words[0];
+            NSString* src2 = words[2];
+            NSString* dest = words[4];
+            [circuitboard bor:src1 src2:src2 dest:dest];
+        } else if ([words[0] isEqualTo:@"NOT"]) {
+            NSString* src = words[1];
+            NSString* dest = words[3];
+            [circuitboard bnot:src dest:dest];
+        } else if ([circuitboard isNumeric:words[0]]) {
+            NSInteger sigVal = [words[0] integerValue];
+            NSString* dest = words[2];
+            [circuitboard sendSignal:sigVal dest:dest];
         } else {
-            // NSLog(@"running the default case");
+            NSLog(@"don't know what to do with this line");
         }
-        
     }
     [circuitboard print];
 
