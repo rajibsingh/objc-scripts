@@ -7,13 +7,12 @@
 -(void)addToDict:(NSString*)key value:(NSInteger)value;
 -(NSInteger)getRegister:(NSString*)name;
 -(BOOL)isNumeric:(NSString*)key;
--(void)rshift:(NSString*)src shifts:(NSInteger)shifts dest:(NSString*)dest;
--(void)lshift:(NSString*)src shifts:(NSInteger)shifts dest:(NSString*)dest;
--(void)band:(NSString*)src1 src2:(NSString*)src2 dest:(NSString*)dest;
--(void)sendSignal:(NSInteger)sigVal dest:(NSString*)dest;
--(void)bor:(NSString*)src1 src2:(NSString*)src2 dest:(NSString*)dest;
--(void)bnot:(NSString*)src1 dest:(NSString*)dest;
+-(void)shiftOp:(NSString*)src shifts:(NSInteger)shifts dest:(NSString*)dest
+    direction:(NSString*)direction;
+-(void)andOrOp:(NSString*)src1 src2:(NSString*)src2 dest:(NSString*)dest op:(NSString*)op;
+-(void)sendSignal:(NSString*)src dest:(NSString*)dest invert:(bool)invert;
 -(void)print;
+-(NSNumber*)disambiguateValue:(NSString*)src;
 
 @end
 /*********************************/
@@ -38,77 +37,73 @@ NSMutableDictionary *board;
     return [retVal integerValue];
 }
 
--(void)rshift:(NSString*)src shifts:(NSInteger)shifts dest:(NSString*)dest {
-    NSLog(@"running RSHIFT case: src: %@, shifts: %ld, dest: %@", src, shifts, dest);
-    NSNumber* val = [board objectForKey:src];
-    NSLog(@"retrieved %@", val);
-    NSInteger retVal = 0;
-    if (val == nil) {
-        retVal = 0;
-    } else {
-        retVal = [val integerValue] >> shifts;
-    }
-    NSLog(@"retVal: %ld", retVal);
-    [self addToDict:dest value:retVal];
-}
+-(void)shiftOp:(NSString*)src shifts:(NSInteger)shifts dest:(NSString*)dest
+        direction:(NSString*)direction {
+    NSLog(@"running SHIFT case: src: %@, shifts: %ld, dest: %@, direction: %@",
+         src, shifts, dest, direction);
+    NSNumber* val;
+    //check if numeric or a reference to a location
+    val = [self disambiguateValue:src];
 
--(void)lshift:(NSString*)src shifts:(NSInteger)shifts dest:(NSString*)dest {
-    NSLog(@"running LSHIFT case: src: %@, shifts: %ld, dest: %@", src, shifts, dest);
-    NSNumber* val = [board objectForKey:src];
-    NSLog(@"retrieved %@", val);
     NSInteger retVal = 0;
-    if (val == nil) {
-        retVal = 0;
-    } else {
+    if ([direction isEqualToString:@"RSHIFT"]) {
+        retVal = [val integerValue] >> shifts;
+    } else if ([direction isEqualToString:@"LSHIFT"]) {
         retVal = [val integerValue] << shifts;
     }
+
     NSLog(@"retVal: %ld", retVal);
     [self addToDict:dest value:retVal];
 }
 
--(void)band:(NSString*)src1 src2:(NSString*)src2 dest:(NSString*)dest {
-    NSLog(@"running bAnd case: src1: %@ src2: %@ dest: %@", src1, src2, dest);
-    NSNumber* src1val = [board objectForKey:src1];
-    NSNumber* src2val = [board objectForKey:src2];
-    NSInteger retVal = [src1val integerValue] & [src2val integerValue];
+-(void)andOrOp:(NSString*)src1 src2:(NSString*)src2 dest:(NSString*)dest
+        op:(NSString*)op{
+    NSLog(@"running bAnd case: src1: %@ src2: %@ dest: %@ op:%@", src1, src2, dest, op);
+    NSNumber* src1Val = [self disambiguateValue:src1];
+    NSNumber*src2Val = [self disambiguateValue:src2];
+    NSInteger retVal;
+    if ([op isEqualToString:@"AND"]) {
+        retVal = [src1Val integerValue] & [src2Val integerValue];
+    } else if ([op isEqualToString:@"OR"]) {
+        retVal = [src1Val integerValue] | [src2Val integerValue];
+    }
     NSLog(@"retVal: %ld", retVal);
     [self addToDict:dest value:retVal];
 }
 
--(void)bor:(NSString*)src1 src2:(NSString*)src2 dest:(NSString*)dest {
-    NSLog(@"running bOr case: src1: %@ src2: %@ dest: %@", src1, src2, dest);
-    NSNumber* src1val = [board objectForKey:src1];
-    NSNumber* src2val = [board objectForKey:src2];
-    NSInteger retVal = [src1val integerValue] | [src2val integerValue];
-    NSLog(@"retVal: %ld", retVal);
-    [self addToDict:dest value:retVal];
+-(void)sendSignal:(NSString*)src dest:(NSString*)dest invert:(bool)invert{
+    NSLog(@"running the sendSignal case: src: %@ dest: %@", src, dest);
+    NSNumber* srcVal = [self disambiguateValue:src];
+    NSInteger retVal;
+    if (invert) {
+        uint16_t retVal = ~([srcVal unsignedIntValue]);
+        NSLog(@"retVal: %hu", retVal);
+        [self addToDict:dest value:retVal];
+    } else {
+        [self addToDict:dest value:[srcVal integerValue]];
+    }
 }
 
-
--(void)bnot:(NSString*)src dest:(NSString*)dest {
-    NSLog(@"running bNot case: src: %@ dest: %@", src, dest);
-    NSNumber* srcVal = [board objectForKey:src];
-    NSUInteger retVal = ~[srcVal uint32Value];
-    NSLog(@"retVal: %ld", retVal);
-    [self addToDict:dest value:retVal];
+-(NSNumber*)disambiguateValue:(NSString*)src {
+    NSNumber* val;
+    //check if numeric or a reference to a location
+    if (![self isNumeric:src]) {
+        val = [board objectForKey:src];
+    } else {
+        val = [NSNumber numberWithInt:[src integerValue]];
+    }
+    NSLog(@"disambiguated %@ --> %@", src, val);
+    return val;
 }
-
--(void)sendSignal:(NSInteger)sigVal dest:(NSString*)dest {
-    NSLog(@"running the sendSignal case: dest: %@ sigVal:%ld", dest, sigVal);
-    [self addToDict:dest value:sigVal];
-}
-
 
 -(void)print {
     NSLog(@"board: %@", board);
 }
 
 -(BOOL)isNumeric:(NSString*)str {
-    // NSLog(@"testing: %@", str);
     NSUInteger len = [str length];
     for (int i = 0; i < len; i++) {
         unichar ch = [str characterAtIndex:i];
-        // NSLog(@"testing %C", ch);
         switch(ch) {
             case '0':
                 break;
@@ -149,37 +144,31 @@ int main() {
     for (NSString* line in lines) {
         NSLog(@"*** line: %@", line);
         NSArray* words = [line componentsSeparatedByString:(NSString *)@" "];
-        if ([words[1] isEqualTo:@"RSHIFT"]) {
+
+        if ([line containsString:@"SHIFT"]) {
+            NSString* direction = words[1];
             NSString* src = words[0];
             int shiftAmount = [words[2] integerValue];
             NSString* dest = words[4];
-            // NSLog(@"running RSHIFT case: src: %@, shiftAmount: %d, dest: %@", src, shiftAmount, dest);
-            [circuitboard rshift:src shifts:shiftAmount dest:dest];
-        } else if ([words[1] isEqualTo:@"LSHIFT"]) {
-            NSString* src = words[0];
-            int shiftAmount = [words[2] integerValue];
-            NSString* dest = words[4];
-            [circuitboard lshift:src shifts:shiftAmount dest:dest];
-       } else if ([words[1] isEqualTo:@"AND"]) {
+            [circuitboard shiftOp:src shifts:shiftAmount dest:dest direction:direction];
+        }
+        else if ([line containsString:@"AND"] || [line containsString:@"OR"]) {
+            NSLog(@"runing andOrOp");
             NSString* src1 = words[0];
             NSString* src2 = words[2];
             NSString* dest = words[4];
-            [circuitboard band:src1 src2:src2 dest:dest];
-        } else if ([words[1] isEqualTo:@"OR"]) {
-            NSString* src1 = words[0];
-            NSString* src2 = words[2];
-            NSString* dest = words[4];
-            [circuitboard bor:src1 src2:src2 dest:dest];
-        } else if ([words[0] isEqualTo:@"NOT"]) {
+            NSString* opName = words[1];
+            [circuitboard andOrOp:src1 src2:src2 dest:dest op:opName];
+        } else if ([line containsString:@"NOT"]) {
+            NSLog(@"running NOT operation");
             NSString* src = words[1];
             NSString* dest = words[3];
-            [circuitboard bnot:src dest:dest];
-        } else if ([circuitboard isNumeric:words[0]]) {
-            NSInteger sigVal = [words[0] integerValue];
-            NSString* dest = words[2];
-            [circuitboard sendSignal:sigVal dest:dest];
+            [circuitboard sendSignal:src dest:dest invert:YES];
         } else {
-            NSLog(@"don't know what to do with this line");
+            NSLog(@"sending signal");
+            NSString* src = words[0];
+            NSString* dest = words[2];
+            [circuitboard sendSignal:src dest:dest invert:NO];
         }
     }
     [circuitboard print];
