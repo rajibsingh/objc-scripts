@@ -58,7 +58,7 @@ NSMutableDictionary *board;
 
 -(void)andOrOp:(NSString*)src1 src2:(NSString*)src2 dest:(NSString*)dest
         op:(NSString*)op{
-    NSLog(@"running bAnd case: src1: %@ src2: %@ dest: %@ op:%@", src1, src2, dest, op);
+    NSLog(@"running andOrOp case: src1: %@ src2: %@ dest: %@ op:%@", src1, src2, dest, op);
     NSNumber* src1Val = [self disambiguateValue:src1];
     NSNumber*src2Val = [self disambiguateValue:src2];
     NSInteger retVal;
@@ -145,7 +145,10 @@ int main() {
         NSLog(@"*** line: %@", line);
         NSArray* words = [line componentsSeparatedByString:(NSString *)@" "];
 
-        if ([line containsString:@"SHIFT"]) {
+        if ([line length] == 0) {
+            NSLog(@"empty line!");
+        }
+        else if ([line containsString:@"SHIFT"]) {
             NSString* direction = words[1];
             NSString* src = words[0];
             int shiftAmount = [words[2] integerValue];
@@ -153,7 +156,6 @@ int main() {
             [circuitboard shiftOp:src shifts:shiftAmount dest:dest direction:direction];
         }
         else if ([line containsString:@"AND"] || [line containsString:@"OR"]) {
-            NSLog(@"runing andOrOp");
             NSString* src1 = words[0];
             NSString* src2 = words[2];
             NSString* dest = words[4];
