@@ -1,1 +1,1 @@
-input-dev.txt
+input-full.txt

@@ -3,18 +3,43 @@
 /*********************************/
 @interface Circuitboard:NSObject 
 
--(Circuitboard*)init;
--(void)addToDict:(NSString*)key value:(NSInteger)value;
--(NSInteger)getRegister:(NSString*)name;
--(BOOL)isNumeric:(NSString*)key;
--(void)shiftOp:(NSString*)src shifts:(NSInteger)shifts dest:(NSString*)dest
-    direction:(NSString*)direction;
--(void)andOrOp:(NSString*)src1 src2:(NSString*)src2 dest:(NSString*)dest op:(NSString*)op;
--(void)sendSignal:(NSString*)src dest:(NSString*)dest invert:(bool)invert;
--(void)print;
--(NSNumber*)disambiguateValue:(NSString*)src;
+    -(Circuitboard*)init;
+    -(void)addToDict:(NSString*)key value:(NSInteger)value;
+    -(NSInteger)getRegister:(NSString*)name;
+    -(BOOL)isNumeric:(NSString*)key;
+    -(void)shiftOp:(NSString*)src shifts:(NSInteger)shifts dest:(NSString*)dest
+        direction:(NSString*)direction;
+    -(void)andOrOp:(NSString*)src1 src2:(NSString*)src2 dest:(NSString*)dest op:(NSString*)op;
+    -(void)sendSignal:(NSString*)src dest:(NSString*)dest invert:(bool)invert;
+    -(void)print;
+    -(NSNumber*)disambiguateValue:(NSString*)src;
 
 @end
+
+/**********************************/
+@interface Input:NSObject
+    -(Input*) init;
+    -(NSString*) getOp;
+    -(NSMutableArray*)getInputs;
+@end
+
+/*********************************/
+@implementation Input
+    -(Input*) init {
+        return self;
+    }
+
+    -(NSString*) getOp {
+        return @"not implemented yet";
+    }
+
+    -(NSMutableArray*) getInputs {
+        return [[NSMutableArray alloc] init];
+    }
+
+
+@end
+
 /*********************************/
 @implementation Circuitboard 
 
