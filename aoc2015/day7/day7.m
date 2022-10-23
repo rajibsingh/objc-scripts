@@ -1,10 +1,11 @@
 #import <Foundation/Foundation.h>
 
+enum OperationType {push, and, or, lshift, rshift};
+
 /*********************************/
 @interface Circuitboard:NSObject 
-
     -(Circuitboard*)init;
-    -(void)addToDict:(NSString*)key value:(NSInteger)value;
+    -(void)setRegister:(NSString*)key value:(NSInteger)value;
     -(NSInteger)getRegister:(NSString*)name;
     -(BOOL)isNumeric:(NSString*)key;
     -(void)shiftOp:(NSString*)src shifts:(NSInteger)shifts dest:(NSString*)dest
@@ -13,151 +14,167 @@
     -(void)sendSignal:(NSString*)src dest:(NSString*)dest invert:(bool)invert;
     -(void)print;
     -(NSNumber*)disambiguateValue:(NSString*)src;
-
-@end
-
-/**********************************/
-@interface Input:NSObject
-    -(Input*) init;
-    -(NSString*) getOp;
-    -(NSMutableArray*)getInputs;
-@end
-
-/*********************************/
-@implementation Input
-    -(Input*) init {
-        return self;
-    }
-
-    -(NSString*) getOp {
-        return @"not implemented yet";
-    }
-
-    -(NSMutableArray*) getInputs {
-        return [[NSMutableArray alloc] init];
-    }
-
-
 @end
 
 /*********************************/
 @implementation Circuitboard 
 
-NSMutableDictionary *board;
+    NSMutableDictionary *board;
+    NSMutableDictionary *registers;
+    NSMutableArray *wires;
 
--(Circuitboard*)init {
-    if (self = [super init]) {
-        board =  [[NSMutableDictionary alloc] initWithCapacity:1];
-    }
-    return self;
-}
-
--(void)addToDict:(NSString*)key value:(NSInteger)value {
-    NSNumber* valObj= [NSNumber numberWithInt:value];
-    [board setObject:valObj forKey:key];
-}
-
--(NSInteger)getRegister:(NSString*)name {
-    NSNumber* retVal = board[name];
-    return [retVal integerValue];
-}
-
--(void)shiftOp:(NSString*)src shifts:(NSInteger)shifts dest:(NSString*)dest
-        direction:(NSString*)direction {
-    NSLog(@"running SHIFT case: src: %@, shifts: %ld, dest: %@, direction: %@",
-         src, shifts, dest, direction);
-    NSNumber* val;
-    //check if numeric or a reference to a location
-    val = [self disambiguateValue:src];
-
-    NSInteger retVal = 0;
-    if ([direction isEqualToString:@"RSHIFT"]) {
-        retVal = [val integerValue] >> shifts;
-    } else if ([direction isEqualToString:@"LSHIFT"]) {
-        retVal = [val integerValue] << shifts;
+    -(Circuitboard*)init {
+        if (self = [super init]) {
+            board =  [[NSMutableDictionary alloc] initWithCapacity:1];
+            registers = [[NSMutableDictionary alloc] initWithCapacity:1];
+            wires = [[NSMutableArray alloc] initWithCapacity:1];
+        }
+        return self;
     }
 
-    NSLog(@"retVal: %ld", retVal);
-    [self addToDict:dest value:retVal];
-}
-
--(void)andOrOp:(NSString*)src1 src2:(NSString*)src2 dest:(NSString*)dest
-        op:(NSString*)op{
-    NSLog(@"running andOrOp case: src1: %@ src2: %@ dest: %@ op:%@", src1, src2, dest, op);
-    NSNumber* src1Val = [self disambiguateValue:src1];
-    NSNumber*src2Val = [self disambiguateValue:src2];
-    NSInteger retVal;
-    if ([op isEqualToString:@"AND"]) {
-        retVal = [src1Val integerValue] & [src2Val integerValue];
-    } else if ([op isEqualToString:@"OR"]) {
-        retVal = [src1Val integerValue] | [src2Val integerValue];
+    -(void)setRegister:(NSString*)key value:(NSInteger)value {
+        NSNumber* valObj= [NSNumber numberWithInt:value];
+        [board setObject:valObj forKey:key];
     }
-    NSLog(@"retVal: %ld", retVal);
-    [self addToDict:dest value:retVal];
-}
 
--(void)sendSignal:(NSString*)src dest:(NSString*)dest invert:(bool)invert{
-    NSLog(@"running the sendSignal case: src: %@ dest: %@", src, dest);
-    NSNumber* srcVal = [self disambiguateValue:src];
-    NSInteger retVal;
-    if (invert) {
-        uint16_t retVal = ~([srcVal unsignedIntValue]);
-        NSLog(@"retVal: %hu", retVal);
-        [self addToDict:dest value:retVal];
-    } else {
-        [self addToDict:dest value:[srcVal integerValue]];
+    -(NSInteger)getRegister:(NSString*)name {
+        NSNumber* retVal = board[name];
+        return [retVal integerValue];
     }
-}
 
--(NSNumber*)disambiguateValue:(NSString*)src {
-    NSNumber* val;
-    //check if numeric or a reference to a location
-    if (![self isNumeric:src]) {
-        val = [board objectForKey:src];
-    } else {
-        val = [NSNumber numberWithInt:[src integerValue]];
+    -(void)shiftOp:(NSString*)src shifts:(NSInteger)shifts dest:(NSString*)dest
+            direction:(NSString*)direction {
+        NSLog(@"running SHIFT case: src: %@, shifts: %ld, dest: %@, direction: %@",
+             src, shifts, dest, direction);
+        NSNumber* val;
+        //check if numeric or a reference to a location
+        val = [self disambiguateValue:src];
+
+        NSInteger retVal = 0;
+        if ([direction isEqualToString:@"RSHIFT"]) {
+            retVal = [val integerValue] >> shifts;
+        } else if ([direction isEqualToString:@"LSHIFT"]) {
+            retVal = [val integerValue] << shifts;
+        }
+
+        NSLog(@"retVal: %ld", retVal);
+        [self setRegister:dest value:retVal];
     }
-    NSLog(@"disambiguated %@ --> %@", src, val);
-    return val;
-}
 
--(void)print {
-    NSLog(@"board: %@", board);
-}
-
--(BOOL)isNumeric:(NSString*)str {
-    NSUInteger len = [str length];
-    for (int i = 0; i < len; i++) {
-        unichar ch = [str characterAtIndex:i];
-        switch(ch) {
-            case '0':
-                break;
-            case '1':
-                break;
-            case '2':
-                break;
-            case '3':
-                break;
-            case '4':
-                break;
-            case '5':
-                break;
-            case '6':
-                break;
-            case '7':
-                break;
-            case '8':
-                break;
-            case '9':
-                break;
-            default:
-                return NO;
+    -(void)andOrOp:(NSString*)src1 src2:(NSString*)src2 dest:(NSString*)dest
+            op:(NSString*)op{
+        NSLog(@"running andOrOp case: src1: %@ src2: %@ dest: %@ op:%@", src1, src2, dest, op);
+        NSNumber* src1Val = [self disambiguateValue:src1];
+        NSNumber*src2Val = [self disambiguateValue:src2];
+        NSInteger retVal;
+        if ([op isEqualToString:@"AND"]) {
+            retVal = [src1Val integerValue] & [src2Val integerValue];
+        } else if ([op isEqualToString:@"OR"]) {
+            retVal = [src1Val integerValue] | [src2Val integerValue];
+        }
+        NSLog(@"retVal: %ld", retVal);
+        [self setRegister:dest value:retVal];
+    -(void)sendSignal:(NSString*)src dest:(NSString*)dest invert:(bool)invert{
+        NSLog(@"running the sendSignal case: src: %@ dest: %@", src, dest);
+        NSNumber* srcVal = [self disambiguateValue:src];
+        NSInteger retVal;
+        if (invert) {
+            uint16_t retVal = ~([srcVal unsignedIntValue]);
+            NSLog(@"retVal: %hu", retVal);
+            [self setRegister:dest value:retVal];
+        } else {
+            [self setRegister:dest value:[srcVal integerValue]];
         }
     }
+
+    -(NSNumber*)disambiguateValue:(NSString*)src {
+        NSNumber* val;
+        //check if numeric or a reference to a location
+        if (![self isNumeric:src]) {
+            val = [board objectForKey:src];
+        } else {
+            val = [NSNumber numberWithInt:[src integerValue]];
+        }
+        NSLog(@"disambiguated %@ --> %@", src, val);
+        return val;
+    }
+
+    -(void)print {
+        NSLog(@"board: %@", board);
+    }
+
+    -(BOOL)isNumeric:(NSString*)str {
+        NSUInteger len = [str length];
+        for (int i = 0; i < len; i++) {
+            unichar ch = [str characterAtIndex:i];
+            switch(ch) {
+                case '0':
+                    break;
+                case '1':
+                    break;
+                case '2':
+                    break;
+                case '3':
+                    break;
+                case '4':
+                    break;
+                case '5':
+                    break;
+                case '6':
+                    break;
+                case '7':
+                    break;
+                case '8':
+                    break;
+                case '9':
+                    break;
+                default:
+                    return NO;
+            }
+        }
     return YES;
-}
+    }
 @end
+
+/**********************************/
+@interface Wire:NSObject
+        -(Wire*) init:(NSString*)src op:(enum OperationType)op;
+        @property (retain, nonatomic)NSString* srcRegister;
+        @property enum OperationType op;
+        @property (retain, nonatomic)NSString* name;
+        @property (retain, nonatomic)NSString* param;
+@end
+
+/**********************************/
+@implementation Wire
+
+    -(Wire*) init:(NSString*)src op:(enum OperationType)op {
+        if (self = [super init]) {
+        }
+        return self;
+    }
+@end
+/**********************************/
+@interface Register:NSObject
+    -(Register*) init:(NSString*)name;
+    @property (nonatomic, retain) NSString *name;
+    @property (nonatomic, retain) NSObject *value;
+@end
+
 /*********************************/
+@implementation Register
+
+    NSMutableArray *inputs;
+
+    -(Register*) init:(NSString*)name {
+        if (self = [super init]) {
+            inputs = [[NSMutableArray alloc] init];
+            self.name = name;
+        }
+        return self;
+    }
+@end
+/**********************************/
 
 int main() {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
